@@ -42,56 +42,204 @@ class WebDiscoveryAgent:
         self.repo = self.github.get_repo(github_repo)
         
         self.search_queries = search_queries or [
-            "innovative AI tools 2024",
-            "creative AI applications",
+            "innovative AI tools 2025",
+            "creative AI applications", 
             "quirky AI websites",
             "useful AI services",
             "AI-powered web apps",
             "experimental AI projects",
             "fun AI tools",
-            "productivity AI tools"
+            "productivity AI tools",
+            "AI art generators",
+            "AI coding assistants",
+            "AI music tools",
+            "AI writing tools",
+            "AI browser extensions",
+            "AI startup tools",
+            "weird AI experiments"
         ]
         
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         
-    def search_web(self, query: str, num_results: int = 10) -> List[Dict]:
-        """Search web using multiple methods for better results"""
-        results = []
+    def search_web(self, query: str, num_results: int = 15) -> List[Dict]:
+        """Search web using multiple sources for maximum coverage"""
+        all_results = []
+        seen_urls = set()
         
-        # Method 1: Try DuckDuckGo
+        # Source 1: DuckDuckGo general search
         try:
-            search_url = f"https://duckduckgo.com/html/?q={query}"
-            response = requests.get(search_url, headers=self.headers, timeout=10)
+            search_url = f"https://duckduckgo.com/html/?q={query.replace(' ', '+')}"
+            response = requests.get(search_url, headers=self.headers, timeout=15)
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            for result in soup.find_all('div', class_='result')[:num_results//2]:
+            for result in soup.find_all('div', class_='result')[:8]:
                 title_elem = result.find('a', class_='result__a')
                 if title_elem:
                     url = title_elem.get('href')
-                    title = title_elem.get_text().strip()
-                    snippet_elem = result.find('div', class_='result__snippet')
-                    snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                    
-                    if url and url.startswith('http'):
-                        results.append({'url': url, 'title': title, 'snippet': snippet})
+                    if url and url.startswith('http') and url not in seen_urls:
+                        title = title_elem.get_text().strip()
+                        snippet_elem = result.find('div', class_='result__snippet')
+                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                        
+                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                        seen_urls.add(url)
+            
+            print(f"Found {len(all_results)} results from DuckDuckGo")
         except Exception as e:
             print(f"DuckDuckGo search failed: {e}")
         
-        # Method 2: Fallback with some known AI sites to ensure we get results
-        if len(results) < 3:
+        # Source 2: Reddit search (via DuckDuckGo site search)
+        try:
+            reddit_query = f"site:reddit.com {query} AI tool"
+            search_url = f"https://duckduckgo.com/html/?q={reddit_query.replace(' ', '+')}"
+            response = requests.get(search_url, headers=self.headers, timeout=10)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            reddit_count = 0
+            for result in soup.find_all('div', class_='result')[:5]:
+                title_elem = result.find('a', class_='result__a')
+                if title_elem:
+                    url = title_elem.get('href')
+                    if url and 'reddit.com' in url and url not in seen_urls:
+                        title = f"[Reddit] {title_elem.get_text().strip()}"
+                        snippet_elem = result.find('div', class_='result__snippet')
+                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                        
+                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                        seen_urls.add(url)
+                        reddit_count += 1
+            
+            print(f"Found {reddit_count} results from Reddit")
+        except Exception as e:
+            print(f"Reddit search failed: {e}")
+        
+        # Source 3: ProductHunt search
+        try:
+            ph_query = f"site:producthunt.com {query}"
+            search_url = f"https://duckduckgo.com/html/?q={ph_query.replace(' ', '+')}"
+            response = requests.get(search_url, headers=self.headers, timeout=10)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            ph_count = 0
+            for result in soup.find_all('div', class_='result')[:5]:
+                title_elem = result.find('a', class_='result__a')
+                if title_elem:
+                    url = title_elem.get('href')
+                    if url and 'producthunt.com' in url and url not in seen_urls:
+                        title = f"[ProductHunt] {title_elem.get_text().strip()}"
+                        snippet_elem = result.find('div', class_='result__snippet')
+                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                        
+                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                        seen_urls.add(url)
+                        ph_count += 1
+            
+            print(f"Found {ph_count} results from ProductHunt")
+        except Exception as e:
+            print(f"ProductHunt search failed: {e}")
+        
+        # Source 4: GitHub search for AI projects
+        try:
+            github_query = f"site:github.com {query} AI"
+            search_url = f"https://duckduckgo.com/html/?q={github_query.replace(' ', '+')}"
+            response = requests.get(search_url, headers=self.headers, timeout=10)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            github_count = 0
+            for result in soup.find_all('div', class_='result')[:4]:
+                title_elem = result.find('a', class_='result__a')
+                if title_elem:
+                    url = title_elem.get('href')
+                    if url and 'github.com' in url and url not in seen_urls:
+                        title = f"[GitHub] {title_elem.get_text().strip()}"
+                        snippet_elem = result.find('div', class_='result__snippet')
+                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                        
+                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                        seen_urls.add(url)
+                        github_count += 1
+            
+            print(f"Found {github_count} results from GitHub")
+        except Exception as e:
+            print(f"GitHub search failed: {e}")
+        
+        # Source 5: Hacker News search
+        try:
+            hn_query = f"site:news.ycombinator.com {query}"
+            search_url = f"https://duckduckgo.com/html/?q={hn_query.replace(' ', '+')}"
+            response = requests.get(search_url, headers=self.headers, timeout=10)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            hn_count = 0
+            for result in soup.find_all('div', class_='result')[:3]:
+                title_elem = result.find('a', class_='result__a')
+                if title_elem:
+                    url = title_elem.get('href')
+                    if url and 'ycombinator.com' in url and url not in seen_urls:
+                        title = f"[HackerNews] {title_elem.get_text().strip()}"
+                        snippet_elem = result.find('div', class_='result__snippet')
+                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                        
+                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                        seen_urls.add(url)
+                        hn_count += 1
+            
+            print(f"Found {hn_count} results from Hacker News")
+        except Exception as e:
+            print(f"Hacker News search failed: {e}")
+        
+        # Source 6: AI-specific sites
+        try:
+            ai_sites = [
+                "site:paperswithcode.com",
+                "site:towardsdatascience.com", 
+                "site:analyticsvidhya.com",
+                "site:machinelearningmastery.com"
+            ]
+            
+            for site in ai_sites[:2]:  # Limit to avoid too many requests
+                ai_query = f"{site} {query}"
+                search_url = f"https://duckduckgo.com/html/?q={ai_query.replace(' ', '+')}"
+                response = requests.get(search_url, headers=self.headers, timeout=8)
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                for result in soup.find_all('div', class_='result')[:2]:
+                    title_elem = result.find('a', class_='result__a')
+                    if title_elem:
+                        url = title_elem.get('href')
+                        if url and url not in seen_urls:
+                            site_name = site.replace('site:', '').replace('.com', '').title()
+                            title = f"[{site_name}] {title_elem.get_text().strip()}"
+                            snippet_elem = result.find('div', class_='result__snippet')
+                            snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                            
+                            all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                            seen_urls.add(url)
+            
+            print(f"Total AI-specific site results: {len([r for r in all_results if any(site in r['title'] for site in ['Paperswithcode', 'Towardsdatascience'])])}")
+        except Exception as e:
+            print(f"AI sites search failed: {e}")
+        
+        # Fallback sites - only if we got very few results
+        if len(all_results) < 5:
             fallback_sites = [
                 {'url': 'https://beta.openai.com/playground', 'title': 'OpenAI Playground', 'snippet': 'Interactive AI playground'},
                 {'url': 'https://huggingface.co/spaces', 'title': 'Hugging Face Spaces', 'snippet': 'AI model demos and applications'},
                 {'url': 'https://replicate.com', 'title': 'Replicate', 'snippet': 'Run AI models in the cloud'},
                 {'url': 'https://runwayml.com', 'title': 'RunwayML', 'snippet': 'AI tools for creators'},
-                {'url': 'https://midjourney.com', 'title': 'Midjourney', 'snippet': 'AI art generation'},
+                {'url': 'https://stability.ai', 'title': 'Stability AI', 'snippet': 'Stable Diffusion creators'},
+                {'url': 'https://claude.ai', 'title': 'Claude AI', 'snippet': 'Anthropic AI assistant'},
+                {'url': 'https://perplexity.ai', 'title': 'Perplexity', 'snippet': 'AI-powered search'},
             ]
-            results.extend(fallback_sites[:num_results-len(results)])
-            print(f"Added {len(fallback_sites)} fallback sites for testing")
             
-        return results
+            needed = min(10 - len(all_results), len(fallback_sites))
+            all_results.extend(fallback_sites[:needed])
+            print(f"Added {needed} fallback sites (total results now: {len(all_results)})")
+        
+        print(f"🎯 Total unique results found: {len(all_results)}")
+        return all_results[:num_results]
     
     def extract_website_content(self, url: str) -> Dict:
         """Extract key information from a website"""
