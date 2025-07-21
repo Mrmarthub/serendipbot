@@ -1,0 +1,146 @@
+[
+  {
+    "title": "This Person Does Not Exist",
+    "description": "AI-generated faces of people who don't actually exist using StyleGAN neural networks",
+    "link": "https://thispersondoesnotexist.com",
+    "category": "ai-tools",
+    "emoji": "👤",
+    "tags": [
+      "AI",
+      "Faces",
+      "Neural Networks"
+    ]
+  },
+  {
+    "title": "Artbreeder",
+    "description": "Collaborative AI art tool that lets you create and explore images using GANs",
+    "link": "https://artbreeder.com",
+    "category": "creative",
+    "emoji": "🎨",
+    "tags": [
+      "AI",
+      "Art",
+      "Collaborative"
+    ]
+  },
+  {
+    "title": "AI Weirdness",
+    "description": "Blog showcasing hilarious and bizarre results when AI tries to understand human things",
+    "link": "https://aiweirdness.com",
+    "category": "fun",
+    "emoji": "🤪",
+    "tags": [
+      "AI",
+      "Humor",
+      "Blog"
+    ]
+  },
+  {
+    "title": "Deep Dream Generator",
+    "description": "Generate surreal, dream-like images using advanced neural networks",
+    "link": "https://deepdreamgenerator.com",
+    "category": "creative",
+    "emoji": "🌌",
+    "tags": [
+      "AI",
+      "Art",
+      "Dreams"
+    ]
+  },
+  {
+    "title": "Quick, Draw!",
+    "description": "Google's AI experiment that challenges you to draw while a neural network guesses",
+    "link": "https://quickdraw.withgoogle.com",
+    "category": "games",
+    "emoji": "✏️",
+    "tags": [
+      "AI",
+      "Drawing",
+      "Game"
+    ]
+  },
+  {
+    "title": "Blob Opera",
+    "description": "Create opera harmonies by dragging adorable blob voices",
+    "link": "https://blobopera.io",
+    "category": "creative",
+    "emoji": "🎶",
+    "tags": [
+      "Music",
+      "Interactive",
+      "Fun"
+    ]
+  },
+  {
+    "title": "InspiroBot",
+    "description": "AI-generated motivational quotes with a twist - usually absurd or darkly funny",
+    "link": "https://inspirobot.me",
+    "category": "fun",
+    "emoji": "💡",
+    "tags": [
+      "AI",
+      "Quotes",
+      "Humor"
+    ]
+  },
+  {
+    "title": "Character.AI",
+    "description": "Chat with AI characters and personalities - create conversations with anyone",
+    "link": "https://character.ai",
+    "category": "ai-tools",
+    "emoji": "🗣️",
+    "tags": [
+      "AI",
+      "Chatbot",
+      "Roleplay"
+    ]
+  },
+  {
+    "title": "This Word Does Not Exist",
+    "description": "AI generates fake words that sound real, complete with definitions",
+    "link": "https://thisworddoesnotexist.com",
+    "category": "fun",
+    "emoji": "📝",
+    "tags": [
+      "AI",
+      "Language",
+      "Words"
+    ]
+  },
+  {
+    "title": "AutoDraw",
+    "description": "Doodle freely and watch AI suggest polished clipart versions of your sketches",
+    "link": "https://autodraw.com",
+    "category": "ai-tools",
+    "emoji": "✏️",
+    "tags": [
+      "AI",
+      "Drawing",
+      "Tools"
+    ]
+  },
+  {
+    "title": "Remove.bg",
+    "description": "AI-powered background removal tool that creates perfect cutouts in seconds",
+    "link": "https://remove.bg",
+    "category": "ai-tools",
+    "emoji": "🖼️",
+    "tags": [
+      "AI",
+      "Images",
+      "Tools"
+    ]
+  },
+  {
+    "title": "Craiyon",
+    "description": "Type a prompt and get quirky AI art in seconds - formerly DALL-E Mini",
+    "link": "https://craiyon.com",
+    "category": "creative",
+    "emoji": "🖌️",
+    "tags": [
+      "AI",
+      "Art",
+      "Text to Image"
+    ]
+  }
+]
