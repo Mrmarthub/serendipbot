@@ -15,6 +15,20 @@
       "screenshot_url": null
     },
     {
+      "url": "https://stability.ai",
+      "title": "Stability AI",
+      "description": "Multimodal media generation and editing tools designed for the best in the business. No creative challenge too big, no timeline too tight. Get to production with Stability AI, your enterprise-ready creative partner.",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T19:59:54.131293",
+      "screenshot_url": null
+    },
+    {
       "url": "https://huggingface.co/spaces",
       "title": "Spaces - Hugging Face",
       "description": "Discover amazing ML apps made by the community",
@@ -71,6 +85,6 @@
       "screenshot_url": null
     }
   ],
-  "last_updated": "2025-07-21T19:50:00.838706",
-  "total_discoveries": 5
+  "last_updated": "2025-07-21T20:00:04.516838",
+  "total_discoveries": 6
 }
