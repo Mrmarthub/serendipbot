@@ -59,184 +59,126 @@ class WebDiscoveryAgent:
             "weird AI experiments"
         ]
         
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        # Rotating user agents to avoid blocks
+        self.user_agents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0'
+        ]
+        self.current_ua_index = 0
+        
+    def get_headers(self):
+        """Get rotating headers to avoid detection"""
+        self.current_ua_index = (self.current_ua_index + 1) % len(self.user_agents)
+        return {
+            'User-Agent': self.user_agents[self.current_ua_index],
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
         }
         
     def search_web(self, query: str, num_results: int = 15) -> List[Dict]:
-        """Search web using multiple sources for maximum coverage"""
+        """Search web using multiple sources with anti-detection measures"""
         all_results = []
         seen_urls = set()
         
-        # Source 1: DuckDuckGo general search
-        try:
-            search_url = f"https://duckduckgo.com/html/?q={query.replace(' ', '+')}"
-            response = requests.get(search_url, headers=self.headers, timeout=15)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            for result in soup.find_all('div', class_='result')[:8]:
-                title_elem = result.find('a', class_='result__a')
-                if title_elem:
-                    url = title_elem.get('href')
-                    if url and url.startswith('http') and url not in seen_urls:
-                        title = title_elem.get_text().strip()
-                        snippet_elem = result.find('div', class_='result__snippet')
-                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                        
-                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
-                        seen_urls.add(url)
-            
-            print(f"Found {len(all_results)} results from DuckDuckGo")
-        except Exception as e:
-            print(f"DuckDuckGo search failed: {e}")
+        # Enhanced fallback with more diverse AI sites
+        quality_ai_sites = [
+            {'url': 'https://beta.openai.com/playground', 'title': 'OpenAI Playground', 'snippet': 'Interactive AI playground for GPT models'},
+            {'url': 'https://huggingface.co/spaces', 'title': 'Hugging Face Spaces', 'snippet': 'Community AI model demos and applications'},
+            {'url': 'https://replicate.com/explore', 'title': 'Replicate Explore', 'snippet': 'Discover and run AI models in the cloud'},
+            {'url': 'https://runwayml.com/ai-tools', 'title': 'RunwayML AI Tools', 'snippet': 'Creative AI tools for content creators'},
+            {'url': 'https://stability.ai/stablediffusion', 'title': 'Stable Diffusion', 'snippet': 'Open source AI image generation'},
+            {'url': 'https://claude.ai', 'title': 'Claude AI', 'snippet': 'Anthropic AI assistant for conversations and tasks'},
+            {'url': 'https://perplexity.ai', 'title': 'Perplexity AI', 'snippet': 'AI-powered search and research assistant'},
+            {'url': 'https://character.ai', 'title': 'Character.AI', 'snippet': 'Chat with AI characters and personalities'},
+            {'url': 'https://midjourney.com', 'title': 'Midjourney', 'snippet': 'AI art generation through Discord'},
+            {'url': 'https://fireflies.ai', 'title': 'Fireflies AI', 'snippet': 'AI meeting notes and transcription'},
+            {'url': 'https://jasper.ai', 'title': 'Jasper AI', 'snippet': 'AI copywriting and content creation'},
+            {'url': 'https://copy.ai', 'title': 'Copy.ai', 'snippet': 'AI-powered writing assistant'},
+            {'url': 'https://writesonic.com', 'title': 'Writesonic', 'snippet': 'AI content generator for marketing'},
+            {'url': 'https://luma.ai', 'title': 'Luma AI', 'snippet': '3D content creation with AI'},
+            {'url': 'https://elevenlabs.io', 'title': 'ElevenLabs', 'snippet': 'AI voice synthesis and cloning'},
+            {'url': 'https://synthesia.io', 'title': 'Synthesia', 'snippet': 'AI video generation with avatars'},
+            {'url': 'https://tavus.io', 'title': 'Tavus', 'snippet': 'Personalized AI video generation'},
+            {'url': 'https://murf.ai', 'title': 'Murf AI', 'snippet': 'AI voiceover and text-to-speech'},
+            {'url': 'https://descript.com', 'title': 'Descript', 'snippet': 'AI-powered audio and video editing'},
+            {'url': 'https://beautiful.ai', 'title': 'Beautiful.ai', 'snippet': 'AI presentation design tool'},
+        ]
         
-        # Source 2: Reddit search (via DuckDuckGo site search)
-        try:
-            reddit_query = f"site:reddit.com {query} AI tool"
-            search_url = f"https://duckduckgo.com/html/?q={reddit_query.replace(' ', '+')}"
-            response = requests.get(search_url, headers=self.headers, timeout=10)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            reddit_count = 0
-            for result in soup.find_all('div', class_='result')[:5]:
-                title_elem = result.find('a', class_='result__a')
-                if title_elem:
-                    url = title_elem.get('href')
-                    if url and 'reddit.com' in url and url not in seen_urls:
-                        title = f"[Reddit] {title_elem.get_text().strip()}"
-                        snippet_elem = result.find('div', class_='result__snippet')
-                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                        
-                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
-                        seen_urls.add(url)
-                        reddit_count += 1
-            
-            print(f"Found {reddit_count} results from Reddit")
-        except Exception as e:
-            print(f"Reddit search failed: {e}")
+        # Try simple web search with better error handling
+        search_sources = [
+            f"https://duckduckgo.com/html/?q={query.replace(' ', '+')}",
+            f"https://duckduckgo.com/html/?q={query.replace(' ', '+')}+2024",
+            f"https://duckduckgo.com/html/?q={query.replace(' ', '+')}+tool+website"
+        ]
         
-        # Source 3: ProductHunt search
-        try:
-            ph_query = f"site:producthunt.com {query}"
-            search_url = f"https://duckduckgo.com/html/?q={ph_query.replace(' ', '+')}"
-            response = requests.get(search_url, headers=self.headers, timeout=10)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            ph_count = 0
-            for result in soup.find_all('div', class_='result')[:5]:
-                title_elem = result.find('a', class_='result__a')
-                if title_elem:
-                    url = title_elem.get('href')
-                    if url and 'producthunt.com' in url and url not in seen_urls:
-                        title = f"[ProductHunt] {title_elem.get_text().strip()}"
-                        snippet_elem = result.find('div', class_='result__snippet')
-                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                        
-                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
-                        seen_urls.add(url)
-                        ph_count += 1
-            
-            print(f"Found {ph_count} results from ProductHunt")
-        except Exception as e:
-            print(f"ProductHunt search failed: {e}")
-        
-        # Source 4: GitHub search for AI projects
-        try:
-            github_query = f"site:github.com {query} AI"
-            search_url = f"https://duckduckgo.com/html/?q={github_query.replace(' ', '+')}"
-            response = requests.get(search_url, headers=self.headers, timeout=10)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            github_count = 0
-            for result in soup.find_all('div', class_='result')[:4]:
-                title_elem = result.find('a', class_='result__a')
-                if title_elem:
-                    url = title_elem.get('href')
-                    if url and 'github.com' in url and url not in seen_urls:
-                        title = f"[GitHub] {title_elem.get_text().strip()}"
-                        snippet_elem = result.find('div', class_='result__snippet')
-                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                        
-                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
-                        seen_urls.add(url)
-                        github_count += 1
-            
-            print(f"Found {github_count} results from GitHub")
-        except Exception as e:
-            print(f"GitHub search failed: {e}")
-        
-        # Source 5: Hacker News search
-        try:
-            hn_query = f"site:news.ycombinator.com {query}"
-            search_url = f"https://duckduckgo.com/html/?q={hn_query.replace(' ', '+')}"
-            response = requests.get(search_url, headers=self.headers, timeout=10)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            hn_count = 0
-            for result in soup.find_all('div', class_='result')[:3]:
-                title_elem = result.find('a', class_='result__a')
-                if title_elem:
-                    url = title_elem.get('href')
-                    if url and 'ycombinator.com' in url and url not in seen_urls:
-                        title = f"[HackerNews] {title_elem.get_text().strip()}"
-                        snippet_elem = result.find('div', class_='result__snippet')
-                        snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                        
-                        all_results.append({'url': url, 'title': title, 'snippet': snippet})
-                        seen_urls.add(url)
-                        hn_count += 1
-            
-            print(f"Found {hn_count} results from Hacker News")
-        except Exception as e:
-            print(f"Hacker News search failed: {e}")
-        
-        # Source 6: AI-specific sites
-        try:
-            ai_sites = [
-                "site:paperswithcode.com",
-                "site:towardsdatascience.com", 
-                "site:analyticsvidhya.com",
-                "site:machinelearningmastery.com"
-            ]
-            
-            for site in ai_sites[:2]:  # Limit to avoid too many requests
-                ai_query = f"{site} {query}"
-                search_url = f"https://duckduckgo.com/html/?q={ai_query.replace(' ', '+')}"
-                response = requests.get(search_url, headers=self.headers, timeout=8)
-                soup = BeautifulSoup(response.content, 'html.parser')
+        for search_url in search_sources[:1]:  # Try just one to avoid blocks
+            try:
+                headers = self.get_headers()
+                response = requests.get(search_url, headers=headers, timeout=8)
                 
-                for result in soup.find_all('div', class_='result')[:2]:
-                    title_elem = result.find('a', class_='result__a')
-                    if title_elem:
-                        url = title_elem.get('href')
-                        if url and url not in seen_urls:
-                            site_name = site.replace('site:', '').replace('.com', '').title()
-                            title = f"[{site_name}] {title_elem.get_text().strip()}"
-                            snippet_elem = result.find('div', class_='result__snippet')
-                            snippet = snippet_elem.get_text().strip() if snippet_elem else ""
-                            
-                            all_results.append({'url': url, 'title': title, 'snippet': snippet})
-                            seen_urls.add(url)
-            
-            print(f"Total AI-specific site results: {len([r for r in all_results if any(site in r['title'] for site in ['Paperswithcode', 'Towardsdatascience'])])}")
-        except Exception as e:
-            print(f"AI sites search failed: {e}")
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                    
+                    count = 0
+                    for result in soup.find_all('div', class_='result')[:10]:
+                        title_elem = result.find('a', class_='result__a')
+                        if title_elem and count < 3:  # Limit to avoid overloading
+                            url = title_elem.get('href')
+                            if url and url.startswith('http') and url not in seen_urls:
+                                title = title_elem.get_text().strip()
+                                snippet_elem = result.find('div', class_='result__snippet')
+                                snippet = snippet_elem.get_text().strip() if snippet_elem else ""
+                                
+                                all_results.append({'url': url, 'title': title, 'snippet': snippet})
+                                seen_urls.add(url)
+                                count += 1
+                    
+                    if count > 0:
+                        print(f"Found {count} results from web search")
+                        break  # If we got results, don't try other searches
+                        
+            except Exception as e:
+                print(f"Web search failed: {e}")
+                continue
         
-        # Fallback sites - only if we got very few results
+        # If web search mostly failed, use curated AI sites
         if len(all_results) < 5:
-            fallback_sites = [
-                {'url': 'https://beta.openai.com/playground', 'title': 'OpenAI Playground', 'snippet': 'Interactive AI playground'},
-                {'url': 'https://huggingface.co/spaces', 'title': 'Hugging Face Spaces', 'snippet': 'AI model demos and applications'},
-                {'url': 'https://replicate.com', 'title': 'Replicate', 'snippet': 'Run AI models in the cloud'},
-                {'url': 'https://runwayml.com', 'title': 'RunwayML', 'snippet': 'AI tools for creators'},
-                {'url': 'https://stability.ai', 'title': 'Stability AI', 'snippet': 'Stable Diffusion creators'},
-                {'url': 'https://claude.ai', 'title': 'Claude AI', 'snippet': 'Anthropic AI assistant'},
-                {'url': 'https://perplexity.ai', 'title': 'Perplexity', 'snippet': 'AI-powered search'},
-            ]
+            # Use query-specific AI sites based on the search term
+            relevant_sites = []
+            query_lower = query.lower()
             
-            needed = min(10 - len(all_results), len(fallback_sites))
-            all_results.extend(fallback_sites[:needed])
-            print(f"Added {needed} fallback sites (total results now: {len(all_results)})")
+            if 'art' in query_lower or 'creative' in query_lower or 'image' in query_lower:
+                relevant_sites = [s for s in quality_ai_sites if any(term in s['snippet'].lower() for term in ['art', 'image', 'creative', 'video', 'design'])]
+            elif 'coding' in query_lower or 'developer' in query_lower:
+                relevant_sites = [s for s in quality_ai_sites if any(term in s['snippet'].lower() for term in ['code', 'development', 'programming'])]
+            elif 'writing' in query_lower or 'content' in query_lower:
+                relevant_sites = [s for s in quality_ai_sites if any(term in s['snippet'].lower() for term in ['writing', 'content', 'copy', 'text'])]
+            elif 'music' in query_lower or 'audio' in query_lower or 'voice' in query_lower:
+                relevant_sites = [s for s in quality_ai_sites if any(term in s['snippet'].lower() for term in ['voice', 'audio', 'sound', 'music'])]
+            else:
+                # General AI tools
+                relevant_sites = quality_ai_sites[:8]
+            
+            # Add relevant sites that aren't already included
+            for site in relevant_sites[:6]:
+                if site['url'] not in seen_urls:
+                    all_results.append(site)
+                    seen_urls.add(site['url'])
+            
+            # If still not enough, add more general sites
+            if len(all_results) < 5:
+                for site in quality_ai_sites:
+                    if site['url'] not in seen_urls and len(all_results) < 8:
+                        all_results.append(site)
+                        seen_urls.add(site['url'])
+            
+            print(f"Added {len([r for r in all_results if r['url'] in [s['url'] for s in quality_ai_sites]])} curated AI sites")
         
         print(f"🎯 Total unique results found: {len(all_results)}")
         return all_results[:num_results]
@@ -244,7 +186,8 @@ class WebDiscoveryAgent:
     def extract_website_content(self, url: str) -> Dict:
         """Extract key information from a website"""
         try:
-            response = requests.get(url, headers=self.headers, timeout=10)
+            headers = self.get_headers()
+            response = requests.get(url, headers=headers, timeout=10)
             response.encoding = 'utf-8'  # Force UTF-8 encoding
             soup = BeautifulSoup(response.content, 'html.parser')
             
