@@ -29,6 +29,90 @@
       "screenshot_url": null
     },
     {
+      "url": "https://runwayml.com/ai-tools",
+      "title": "Runway | Tools for human imagination",
+      "description": "Built on-top of foundational in-house research, our fast and controllable generative tools allow you to create high-fidelity content in an a way thats never been possible before.",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:04:43.279300",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://stability.ai/stablediffusion",
+      "title": "Stability AI Image Models Stability AI",
+      "description": "Experience unparalleled image generation capabilities with SDXL Turbo and Stable Diffusion XL. Our models use shorter prompts and generate descriptive images with enhanced composition and realistic aesthetics.",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:04:45.962633",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://murf.ai",
+      "title": "Free AI Voice Generator & Text to Speech Software | Murf AI",
+      "description": "Choose form 200+ AI voices and generate speech in 20+ languages. Murf's AI Voice Generator and Text to Speech software lets you create ultra-realistic AI voiceovers in seconds.",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:05:01.247083",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://jasper.ai",
+      "title": "AI built for marketing | Jasper",
+      "description": "Jasper is the AI platform purpose-built to keep your marketing content real, brand-aligned, and unmistakably youno matter how fast you move.",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:05:06.680538",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://copy.ai",
+      "title": "Future proof your business with GTM AI",
+      "description": "Introducing the first-ever GTM AI platform. Automate hundreds of tedious, repetitive tasks and empower your team to scale success like never before.",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:05:09.608409",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://luma.ai",
+      "title": "Luma AI - Text to Video",
+      "description": "Transform your text into engaging videos effortlessly with Luma AI. Discover our innovative platform that turns written content into dynamic visual stories, perfect for social media, marketing, and more. Try Luma AI today and bring your ideas to life!",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:05:14.631622",
+      "screenshot_url": null
+    },
+    {
       "url": "https://huggingface.co/spaces",
       "title": "Spaces - Hugging Face",
       "description": "Discover amazing ML apps made by the community",
@@ -83,8 +167,92 @@
       ],
       "discovered_date": "2025-07-21T19:49:53.173489",
       "screenshot_url": null
+    },
+    {
+      "url": "https://replicate.com/explore",
+      "title": "Explore |Replicate",
+      "description": "Discover and share open-source machine learning models from the community that you can run in the cloud using Replicate.",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:04:41.080167",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://synthesia.io",
+      "title": "Free AI Video Generator - Create AI Videos in 140 Languages",
+      "description": "Create AI generated videos from text with the most advanced AI avatars and voiceovers in 140+ languages. Try our free AI video generator now!",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:04:52.127569",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://tavus.io",
+      "title": "The OS for Human-AI Interaction",
+      "description": "Tavus is the leading AI video research company that enables product development teams to build white-labeled digital twin experiences with easy-to-use APIs.",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:04:54.979688",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://elevenlabs.io",
+      "title": "Free Text to Speech & AI Voice Generator | ElevenLabs",
+      "description": "Create the most realistic speech with our AI audio tools in 1000s of voices and 70+ languages. Easy to use API's and SDK's. Scalable, secure, and customizable voice solutions tailored for enterprise needs. Pioneering research in Text to Speech and AI Voice Generation.",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:04:58.895267",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://descript.com",
+      "title": "Descript: Edit Videos & Podcasts Like a Doc | AI Video Editor",
+      "description": "Edit your videos & podcasts just by typing. Descript's powerful AI editing tools let you make videos, podcasts, & short clips for social fast. Try it for free.",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:05:03.887046",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://writesonic.com",
+      "title": "Writesonic - AI Search Visibility & AI SEO Automation Platform",
+      "description": "Track your brands AI visibility across ChatGPT, Perplexity & Google AI Overviews using GEO. Plus AI agents that automate SEO workflows and content creation. Start free.",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T20:05:11.943432",
+      "screenshot_url": null
     }
   ],
-  "last_updated": "2025-07-21T20:00:04.516838",
-  "total_discoveries": 6
+  "last_updated": "2025-07-21T20:05:16.814583",
+  "total_discoveries": 18
 }
