@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Supercharged Creative AI Web Discovery Agent
-Searches multiple sources + Perplexity AI for creative websites
+Pure Web Discovery Agent
+Discovers creative AI sites fresh from the web using alternative methods
 """
 
 import os
@@ -13,327 +13,371 @@ from github import Github
 import base64
 from bs4 import BeautifulSoup
 import re
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse, quote
 import random
+import feedparser
 
-def get_headers():
-    """Get rotating headers to avoid detection"""
+def get_rotating_headers():
+    """Get different headers to avoid detection"""
     user_agents = [
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
     ]
+    
     return {
         'User-Agent': random.choice(user_agents),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Cache-Control': 'max-age=0'
     }
 
-def search_perplexity(query):
-    """Search using Perplexity API if available"""
-    perplexity_key = os.getenv('PERPLEXITY_API_KEY')
-    if not perplexity_key:
-        print("⚠️ No Perplexity API key - skipping Perplexity search")
-        return []
+def search_bing_creative_ai():
+    """Use Bing search API or scraping for AI discoveries"""
+    print("🔍 Searching Bing for creative AI sites...")
+    discovered_sites = []
+    
+    search_queries = [
+        "new AI art generator 2024 site:*.ai",
+        "creative AI tool launched 2024",
+        "experimental AI website interactive",
+        "AI music generator new platform",
+        "text to image AI tool 2024",
+        "AI voice synthesis new site",
+        "neural network art creative tool",
+        "generative AI platform new",
+        "AI writing assistant creative 2024",
+        "interactive AI experiment website"
+    ]
+    
+    for query in search_queries[:4]:  # Limit queries
+        try:
+            print(f"  🎯 Query: {query}")
+            
+            # Try Bing search
+            bing_url = f"https://www.bing.com/search?q={quote(query)}&count=10"
+            headers = get_rotating_headers()
+            
+            response = requests.get(bing_url, headers=headers, timeout=15)
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Look for search result links
+                results = soup.find_all('h2') + soup.find_all('a', href=True)
+                
+                for result in results[:5]:  # Limit results per query
+                    if result.name == 'h2':
+                        link = result.find('a', href=True)
+                        if link:
+                            url = link.get('href')
+                            title = link.get_text().strip()
+                        else:
+                            continue
+                    else:
+                        url = result.get('href')
+                        title = result.get_text().strip()
+                    
+                    if url and url.startswith('http') and len(url) > 20:
+                        # Filter for AI-related domains
+                        if any(keyword in url.lower() for keyword in ['.ai', 'ai-', 'artificial', 'neural', 'ml-', 'deep', 'generate', 'create']):
+                            site_info = analyze_discovered_site(url, title)
+                            if site_info:
+                                discovered_sites.append(site_info)
+                                print(f"    ✨ Found: {site_info['title']}")
+                
+            time.sleep(random.uniform(3, 6))  # Random delay to avoid blocks
+            
+        except Exception as e:
+            print(f"    ⚠️ Bing search error: {e}")
+            time.sleep(5)
+    
+    print(f"  📊 Bing discovered: {len(discovered_sites)} sites")
+    return discovered_sites
+
+def search_alternative_engines():
+    """Try alternative search engines that are less likely to block"""
+    print("🌐 Searching alternative engines...")
+    discovered_sites = []
+    
+    # Try Startpage (privacy-focused Google proxy)
+    try:
+        print("  🔍 Trying Startpage...")
+        query = "creative AI tool 2024"
+        startpage_url = f"https://startpage.com/sp/search?query={quote(query)}"
+        
+        response = requests.get(startpage_url, headers=get_rotating_headers(), timeout=15)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Look for result links
+            links = soup.find_all('a', href=True)
+            for link in links[:10]:
+                url = link.get('href')
+                if url and url.startswith('http') and 'ai' in url.lower():
+                    title = link.get_text().strip()
+                    site_info = analyze_discovered_site(url, title)
+                    if site_info:
+                        discovered_sites.append(site_info)
+                        print(f"    ✨ Startpage found: {site_info['title']}")
+        
+        time.sleep(random.uniform(4, 7))
+        
+    except Exception as e:
+        print(f"    ⚠️ Startpage error: {e}")
+    
+    # Try Searx instances (open source search)
+    try:
+        print("  🔍 Trying Searx...")
+        searx_instances = [
+            "https://search.bus-hit.me",
+            "https://searx.be",
+            "https://searx.tiekoetter.com"
+        ]
+        
+        searx_url = random.choice(searx_instances)
+        query_url = f"{searx_url}/search?q=AI+creative+tool+2024&categories=general"
+        
+        response = requests.get(query_url, headers=get_rotating_headers(), timeout=15)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            results = soup.find_all('h3') + soup.find_all('a', href=True)
+            for result in results[:8]:
+                if result.name == 'h3':
+                    link = result.find('a', href=True)
+                    if link:
+                        url = link.get('href')
+                        title = link.get_text().strip()
+                    else:
+                        continue
+                else:
+                    url = result.get('href')
+                    title = result.get_text().strip()
+                
+                if url and url.startswith('http') and any(ai_word in url.lower() for ai_word in ['ai', 'artificial', 'neural', 'ml']):
+                    site_info = analyze_discovered_site(url, title)
+                    if site_info:
+                        discovered_sites.append(site_info)
+                        print(f"    ✨ Searx found: {site_info['title']}")
+        
+        time.sleep(random.uniform(3, 5))
+        
+    except Exception as e:
+        print(f"    ⚠️ Searx error: {e}")
+    
+    print(f"  📊 Alternative engines discovered: {len(discovered_sites)} sites")
+    return discovered_sites
+
+def discover_from_rss_feeds():
+    """Discover AI sites from RSS feeds and news sources"""
+    print("📡 Discovering from RSS feeds...")
+    discovered_sites = []
+    
+    # AI/Tech RSS feeds that might mention new tools
+    rss_feeds = [
+        "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "https://venturebeat.com/ai/feed/",
+        "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
+        "https://feeds.feedburner.com/oreilly/radar",
+        "https://www.wired.com/feed/tag/ai/latest/rss"
+    ]
+    
+    for feed_url in rss_feeds[:3]:  # Limit feeds
+        try:
+            print(f"  📰 Checking feed: {feed_url.split('/')[2]}")
+            
+            # Parse RSS feed
+            feed = feedparser.parse(feed_url)
+            
+            for entry in feed.entries[:5]:  # Check recent entries
+                title = entry.get('title', '')
+                link = entry.get('link', '')
+                description = entry.get('summary', '')
+                
+                # Look for AI tool mentions in content
+                content = f"{title} {description}".lower()
+                if any(keyword in content for keyword in ['ai tool', 'ai platform', 'new ai', 'ai app', 'ai website', 'ai service']):
+                    
+                    # Try to extract mentioned URLs from the content
+                    urls = re.findall(r'https?://[^\s<>"]+', description)
+                    for url in urls:
+                        if any(ai_indicator in url.lower() for ai_indicator in ['.ai', 'ai-', 'artificial', 'neural']):
+                            site_info = analyze_discovered_site(url, f"[RSS] {title}")
+                            if site_info:
+                                discovered_sites.append(site_info)
+                                print(f"    ✨ RSS found: {site_info['title']}")
+            
+            time.sleep(random.uniform(2, 4))
+            
+        except Exception as e:
+            print(f"    ⚠️ RSS feed error: {e}")
+    
+    print(f"  📊 RSS discovered: {len(discovered_sites)} sites")
+    return discovered_sites
+
+def discover_from_github_trending():
+    """Find AI projects from GitHub trending that might have web interfaces"""
+    print("🐙 Checking GitHub trending AI projects...")
+    discovered_sites = []
     
     try:
-        print(f"🧠 Searching Perplexity: {query}")
-        
-        headers = {
-            'Authorization': f'Bearer {perplexity_key}',
-            'Content-Type': 'application/json'
-        }
-        
-        data = {
-            "model": "llama-3.1-sonar-small-128k-online",
-            "messages": [
-                {
-                    "role": "user", 
-                    "content": f"Find 5 creative, experimental, or quirky AI websites for: {query}. Return only the URLs, one per line, no explanations."
-                }
-            ]
-        }
-        
-        response = requests.post(
-            'https://api.perplexity.ai/chat/completions',
-            json=data,
-            headers=headers,
-            timeout=30
-        )
+        # Get trending AI repositories
+        github_url = "https://github.com/trending?l=python&since=weekly"
+        response = requests.get(github_url, headers=get_rotating_headers(), timeout=15)
         
         if response.status_code == 200:
-            result = response.json()
-            content = result['choices'][0]['message']['content']
-            urls = re.findall(r'https?://[^\s\n]+', content)
-            print(f"🎯 Perplexity found {len(urls)} URLs")
-            return urls[:5]  # Limit to 5
-        else:
-            print(f"⚠️ Perplexity API error: {response.status_code}")
+            soup = BeautifulSoup(response.content, 'html.parser')
             
+            # Look for repo links
+            repo_links = soup.find_all('a', href=True)
+            
+            for link in repo_links[:10]:
+                href = link.get('href')
+                if href and href.startswith('/') and len(href.split('/')) >= 3:
+                    repo_url = f"https://github.com{href}"
+                    title = link.get_text().strip()
+                    
+                    # Check if it's an AI-related repo
+                    if any(ai_word in title.lower() for ai_word in ['ai', 'artificial', 'neural', 'ml', 'deep', 'generate']):
+                        
+                        # Try to find if this repo has a web demo
+                        try:
+                            repo_response = requests.get(repo_url, headers=get_rotating_headers(), timeout=10)
+                            if repo_response.status_code == 200:
+                                repo_soup = BeautifulSoup(repo_response.content, 'html.parser')
+                                
+                                # Look for demo links in README or description
+                                demo_links = repo_soup.find_all('a', href=True)
+                                for demo_link in demo_links:
+                                    demo_href = demo_link.get('href')
+                                    demo_text = demo_link.get_text().strip().lower()
+                                    
+                                    if demo_href and demo_href.startswith('http') and any(demo_word in demo_text for demo_word in ['demo', 'try', 'app', 'website', 'live']):
+                                        site_info = analyze_discovered_site(demo_href, f"[GitHub] {title}")
+                                        if site_info:
+                                            discovered_sites.append(site_info)
+                                            print(f"    ✨ GitHub demo found: {site_info['title']}")
+                                            break
+                        except:
+                            pass
+                        
+                        time.sleep(random.uniform(2, 4))
+        
     except Exception as e:
-        print(f"⚠️ Perplexity search error: {e}")
+        print(f"    ⚠️ GitHub trending error: {e}")
     
-    return []
+    print(f"  📊 GitHub discovered: {len(discovered_sites)} sites")
+    return discovered_sites
 
-def search_duckduckgo(query, max_results=5):
-    """Search DuckDuckGo for creative AI sites"""
+def analyze_discovered_site(url, fallback_title=""):
+    """Analyze a discovered site to create structured data"""
     try:
-        print(f"🦆 Searching DuckDuckGo: {query}")
-        search_url = f"https://duckduckgo.com/html/?q={query.replace(' ', '+')}"
+        print(f"    🔍 Analyzing: {url}")
         
-        response = requests.get(search_url, headers=get_headers(), timeout=15)
+        response = requests.get(url, headers=get_rotating_headers(), timeout=8)
         if response.status_code != 200:
-            return []
+            return None
         
-        soup = BeautifulSoup(response.content, 'html.parser')
-        results = []
-        
-        for result in soup.find_all('div', class_='result')[:max_results]:
-            title_elem = result.find('a', class_='result__a')
-            if title_elem:
-                url = title_elem.get('href')
-                title = title_elem.get_text().strip()
-                
-                if url and url.startswith('http'):
-                    results.append({
-                        'url': url,
-                        'title': title,
-                        'source': 'DuckDuckGo'
-                    })
-        
-        print(f"  Found {len(results)} results from DuckDuckGo")
-        return results
-        
-    except Exception as e:
-        print(f"⚠️ DuckDuckGo search failed: {e}")
-        return []
-
-def search_reddit_ai(query):
-    """Search Reddit for AI tool discussions"""
-    try:
-        print(f"🤖 Searching Reddit: {query}")
-        reddit_query = f"site:reddit.com {query} AI tool 2024 2025"
-        search_url = f"https://duckduckgo.com/html/?q={reddit_query.replace(' ', '+')}"
-        
-        response = requests.get(search_url, headers=get_headers(), timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        results = []
-        for result in soup.find_all('div', class_='result')[:3]:
-            title_elem = result.find('a', class_='result__a')
-            if title_elem and 'reddit.com' in title_elem.get('href', ''):
-                url = title_elem.get('href')
-                title = f"[Reddit] {title_elem.get_text().strip()}"
-                results.append({
-                    'url': url,
-                    'title': title,
-                    'source': 'Reddit'
-                })
-        
-        print(f"  Found {len(results)} Reddit discussions")
-        return results
-        
-    except Exception as e:
-        print(f"⚠️ Reddit search failed: {e}")
-        return []
-
-def search_producthunt(query):
-    """Search ProductHunt for AI products"""
-    try:
-        print(f"🚀 Searching ProductHunt: {query}")
-        ph_query = f"site:producthunt.com {query} AI"
-        search_url = f"https://duckduckgo.com/html/?q={ph_query.replace(' ', '+')}"
-        
-        response = requests.get(search_url, headers=get_headers(), timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        results = []
-        for result in soup.find_all('div', class_='result')[:4]:
-            title_elem = result.find('a', class_='result__a')
-            if title_elem and 'producthunt.com' in title_elem.get('href', ''):
-                url = title_elem.get('href')
-                title = f"[ProductHunt] {title_elem.get_text().strip()}"
-                results.append({
-                    'url': url,
-                    'title': title,
-                    'source': 'ProductHunt'
-                })
-        
-        print(f"  Found {len(results)} ProductHunt products")
-        return results
-        
-    except Exception as e:
-        print(f"⚠️ ProductHunt search failed: {e}")
-        return []
-
-def search_github_ai(query):
-    """Search GitHub for AI projects"""
-    try:
-        print(f"🐙 Searching GitHub: {query}")
-        github_query = f"site:github.com {query} AI creative tool"
-        search_url = f"https://duckduckgo.com/html/?q={github_query.replace(' ', '+')}"
-        
-        response = requests.get(search_url, headers=get_headers(), timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        results = []
-        for result in soup.find_all('div', class_='result')[:3]:
-            title_elem = result.find('a', class_='result__a')
-            if title_elem and 'github.com' in title_elem.get('href', ''):
-                url = title_elem.get('href')
-                title = f"[GitHub] {title_elem.get_text().strip()}"
-                results.append({
-                    'url': url,
-                    'title': title,
-                    'source': 'GitHub'
-                })
-        
-        print(f"  Found {len(results)} GitHub projects")
-        return results
-        
-    except Exception as e:
-        print(f"⚠️ GitHub search failed: {e}")
-        return []
-
-def search_hackernews(query):
-    """Search Hacker News for AI discussions"""
-    try:
-        print(f"📰 Searching Hacker News: {query}")
-        hn_query = f"site:news.ycombinator.com {query} AI"
-        search_url = f"https://duckduckgo.com/html/?q={hn_query.replace(' ', '+')}"
-        
-        response = requests.get(search_url, headers=get_headers(), timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        results = []
-        for result in soup.find_all('div', class_='result')[:2]:
-            title_elem = result.find('a', class_='result__a')
-            if title_elem and 'ycombinator.com' in title_elem.get('href', ''):
-                url = title_elem.get('href')
-                title = f"[HackerNews] {title_elem.get_text().strip()}"
-                results.append({
-                    'url': url,
-                    'title': title,
-                    'source': 'HackerNews'
-                })
-        
-        print(f"  Found {len(results)} HackerNews discussions")
-        return results
-        
-    except Exception as e:
-        print(f"⚠️ HackerNews search failed: {e}")
-        return []
-
-def search_ai_specific_sites(query):
-    """Search AI-specific sites"""
-    try:
-        print(f"🤖 Searching AI-specific sites: {query}")
-        ai_sites_query = f"(site:huggingface.co OR site:paperswithcode.com OR site:towardsdatascience.com) {query}"
-        search_url = f"https://duckduckgo.com/html/?q={ai_sites_query.replace(' ', '+')}"
-        
-        response = requests.get(search_url, headers=get_headers(), timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        results = []
-        for result in soup.find_all('div', class_='result')[:3]:
-            title_elem = result.find('a', class_='result__a')
-            if title_elem:
-                url = title_elem.get('href')
-                title = title_elem.get_text().strip()
-                
-                site_name = "AI Site"
-                if 'huggingface' in url:
-                    site_name = "HuggingFace"
-                elif 'paperswithcode' in url:
-                    site_name = "Papers with Code"
-                elif 'towardsdatascience' in url:
-                    site_name = "Towards Data Science"
-                
-                results.append({
-                    'url': url,
-                    'title': f"[{site_name}] {title}",
-                    'source': site_name
-                })
-        
-        print(f"  Found {len(results)} AI-specific results")
-        return results
-        
-    except Exception as e:
-        print(f"⚠️ AI sites search failed: {e}")
-        return []
-
-def analyze_website_content(url):
-    """Analyze website content and create structured data"""
-    try:
-        response = requests.get(url, headers=get_headers(), timeout=8)
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Extract title
-        title = soup.find('title')
-        title_text = title.get_text().strip() if title else "Unknown Site"
-        title_text = re.sub(r'\s+', ' ', title_text)[:100]
+        title_elem = soup.find('title')
+        title = title_elem.get_text().strip() if title_elem else fallback_title
+        title = re.sub(r'\s+', ' ', title)[:100]
+        
+        if not title or title.lower() in ['', 'untitled', 'loading...']:
+            title = fallback_title or urlparse(url).netloc
         
         # Extract description
+        description = ""
         meta_desc = soup.find('meta', attrs={'name': 'description'})
-        description = meta_desc.get('content', '') if meta_desc else ""
+        if meta_desc:
+            description = meta_desc.get('content', '')
         
         if not description:
+            meta_desc = soup.find('meta', attrs={'property': 'og:description'})
+            if meta_desc:
+                description = meta_desc.get('content', '')
+        
+        if not description:
+            # Try first paragraph
             first_p = soup.find('p')
-            description = first_p.get_text().strip()[:200] if first_p else ""
+            if first_p:
+                description = first_p.get_text().strip()[:200]
         
-        description = re.sub(r'\s+', ' ', description).strip()[:200]
+        description = re.sub(r'\s+', ' ', description.strip())[:200] if description else "AI-powered creative tool discovered from web search"
         
-        # Intelligent categorization
-        content_lower = f"{title_text} {description}".lower()
-        category = "creative"
+        # Smart categorization based on content
+        content_text = f"{title} {description} {url}".lower()
+        
+        category = "creative"  # Default
         emoji = "🎨"
-        tags = ["AI"]
+        tags = ["AI", "Discovered"]
         
-        # Advanced categorization logic
-        if any(word in content_lower for word in ['music', 'audio', 'voice', 'sound', 'sing', 'speech']):
+        # Categorize based on keywords
+        if any(word in content_text for word in ['art', 'image', 'photo', 'visual', 'design', 'draw', 'paint', 'creative']):
+            category = "creative"
+            emoji = random.choice(["🎨", "✨", "🖌️", "🎭"])
+            tags.extend(["Art", "Creative"])
+            
+        elif any(word in content_text for word in ['music', 'audio', 'voice', 'sound', 'sing', 'compose']):
             category = "audio"
             emoji = random.choice(["🎵", "🎤", "🎧", "🔊"])
             tags.extend(["Music", "Audio"])
-        elif any(word in content_lower for word in ['art', 'draw', 'paint', 'image', 'visual', 'design', 'create']):
-            category = "creative"
-            emoji = random.choice(["🎨", "✨", "🖌️", "🎭", "🌈"])
-            tags.extend(["Art", "Creative"])
-        elif any(word in content_lower for word in ['game', 'play', 'interactive', 'fun', 'quiz']):
+            
+        elif any(word in content_text for word in ['game', 'play', 'interactive', 'fun', 'quiz', 'adventure']):
             category = "games"
             emoji = random.choice(["🎮", "🎯", "🎲", "🎪"])
             tags.extend(["Game", "Interactive"])
-        elif any(word in content_lower for word in ['tool', 'assistant', 'helper', 'utility', 'productivity']):
+            
+        elif any(word in content_text for word in ['write', 'text', 'copy', 'content', 'article', 'blog']):
             category = "ai-tools"
-            emoji = random.choice(["🤖", "⚡", "🔧", "🛠️"])
-            tags.append("Tools")
-        elif any(word in content_lower for word in ['weird', 'strange', 'experimental', 'research', 'demo']):
+            emoji = random.choice(["✍️", "📝", "💬", "📄"])
+            tags.extend(["Writing", "Text"])
+            
+        elif any(word in content_text for word in ['video', 'animation', 'movie', 'film', 'motion']):
+            category = "creative"
+            emoji = random.choice(["🎬", "🎥", "📹", "🎞️"])
+            tags.extend(["Video", "Animation"])
+            
+        elif any(word in content_text for word in ['chat', 'conversation', 'assistant', 'bot', 'talk']):
+            category = "ai-tools"
+            emoji = random.choice(["🤖", "💬", "🗣️", "💭"])
+            tags.append("Assistant")
+            
+        elif any(word in content_text for word in ['experiment', 'research', 'demo', 'test', 'lab']):
             category = "experimental"
-            emoji = random.choice(["🧪", "⚗️", "🔬", "🌀"])
+            emoji = random.choice(["🧪", "⚗️", "🔬", "🧬"])
             tags.append("Experimental")
-        elif any(word in content_lower for word in ['funny', 'humor', 'joke', 'meme', 'absurd']):
+            
+        elif any(word in content_text for word in ['weird', 'funny', 'humor', 'strange', 'quirky']):
             category = "fun"
             emoji = random.choice(["😄", "🤪", "😂", "🎉"])
             tags.append("Humor")
         
-        # Add specific feature tags
-        if any(word in content_lower for word in ['generate', 'generator', 'creation']):
+        # Add more specific tags
+        if 'generate' in content_text or 'generator' in content_text:
             tags.append("Generation")
-        if any(word in content_lower for word in ['neural', 'network', 'deep learning']):
+        if 'neural' in content_text or 'deep learning' in content_text:
             tags.append("Neural Networks")
-        if any(word in content_lower for word in ['text', 'writing', 'copy']):
-            tags.append("Text")
-        if any(word in content_lower for word in ['video', 'animation', 'motion']):
-            tags.append("Video")
+        if 'open source' in content_text or 'github' in url:
+            tags.append("Open Source")
         
         # Remove duplicates and limit tags
         tags = list(set(tags))[:4]
         
         return {
-            "title": title_text,
-            "description": description or "An interesting AI-powered creative tool",
+            "title": title,
+            "description": description,
             "link": url,
             "category": category,
             "emoji": emoji,
@@ -341,91 +385,13 @@ def analyze_website_content(url):
         }
         
     except Exception as e:
-        print(f"⚠️ Could not analyze {url}: {e}")
+        print(f"    ⚠️ Analysis error for {url}: {e}")
         return None
 
-def discover_creative_sites():
-    """Main discovery function using all sources"""
-    print("🌐 Starting multi-source creative AI discovery...")
-    
-    # Creative search queries
-    creative_queries = [
-        "creative AI art generator 2024",
-        "experimental AI music tools",
-        "weird AI websites interactive",
-        "quirky AI experiments online",
-        "AI drawing playground",
-        "neural network creative tools",
-        "AI text generation fun",
-        "interactive AI experiences",
-        "AI voice synthesis creative",
-        "generative art AI tools"
-    ]
-    
-    all_discovered_sites = []
-    seen_urls = set()
-    
-    for query in creative_queries[:6]:  # Limit queries to avoid timeout
-        print(f"\n🔍 Processing query: '{query}'")
-        
-        query_results = []
-        
-        # Search all sources for this query
-        query_results.extend(search_duckduckgo(query, 3))
-        time.sleep(1)
-        
-        query_results.extend(search_reddit_ai(query))
-        time.sleep(1)
-        
-        query_results.extend(search_producthunt(query))
-        time.sleep(1)
-        
-        query_results.extend(search_github_ai(query))
-        time.sleep(1)
-        
-        query_results.extend(search_hackernews(query))
-        time.sleep(1)
-        
-        query_results.extend(search_ai_specific_sites(query))
-        time.sleep(1)
-        
-        # Use Perplexity for this query
-        perplexity_urls = search_perplexity(query)
-        for url in perplexity_urls:
-            query_results.append({
-                'url': url,
-                'title': f"[Perplexity] Found via AI search",
-                'source': 'Perplexity'
-            })
-        
-        # Analyze promising results
-        for result in query_results:
-            url = result['url']
-            if url in seen_urls or not url.startswith('http'):
-                continue
-            
-            seen_urls.add(url)
-            
-            # Skip certain domains
-            skip_domains = ['reddit.com', 'github.com/topics', 'news.ycombinator.com']
-            if any(domain in url for domain in skip_domains):
-                continue
-            
-            print(f"  📝 Analyzing: {result['title'][:50]}...")
-            
-            site_data = analyze_website_content(url)
-            if site_data:
-                all_discovered_sites.append(site_data)
-                print(f"    ✨ Added: {site_data['title']} ({site_data['category']})")
-        
-        time.sleep(2)  # Rate limiting between queries
-    
-    print(f"\n🎯 Total sites discovered: {len(all_discovered_sites)}")
-    return all_discovered_sites
-
 def main():
-    print("🚀 Supercharged Creative AI Discovery Agent Starting...")
-    print("🌐 Multi-source search: DuckDuckGo + Reddit + ProductHunt + GitHub + HackerNews + AI Sites + Perplexity")
+    print("🚀 Pure Web Discovery Agent Starting...")
+    print("🌐 Discovering creative AI sites fresh from the web")
+    print("🔍 Sources: Bing + Alternative Engines + RSS Feeds + GitHub Trending")
     
     # Get environment variables
     GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -439,8 +405,35 @@ def main():
     github = Github(GITHUB_TOKEN)
     repo = github.get_repo(GITHUB_REPO)
     
-    # Discover new creative AI sites
-    discovered_sites = discover_creative_sites()
+    print("\n🔍 Starting web discovery...")
+    all_discovered = []
+    
+    # Try different discovery methods
+    all_discovered.extend(search_bing_creative_ai())
+    time.sleep(random.uniform(5, 8))
+    
+    all_discovered.extend(search_alternative_engines())
+    time.sleep(random.uniform(5, 8))
+    
+    all_discovered.extend(discover_from_rss_feeds())
+    time.sleep(random.uniform(3, 6))
+    
+    all_discovered.extend(discover_from_github_trending())
+    
+    # Remove duplicates
+    seen_urls = set()
+    unique_discovered = []
+    for site in all_discovered:
+        if site['link'] not in seen_urls:
+            unique_discovered.append(site)
+            seen_urls.add(site['link'])
+    
+    print(f"\n🎯 Total unique sites discovered from web: {len(unique_discovered)}")
+    
+    if not unique_discovered:
+        print("🔍 No new sites discovered from web search - search engines may be blocking requests")
+        print("💡 Try running again later or consider using API-based search services")
+        return
     
     # Load existing data
     existing_sites = []
@@ -454,14 +447,20 @@ def main():
     
     # Filter for truly new sites
     existing_urls = {site.get('link', '') for site in existing_sites}
-    new_sites = [site for site in discovered_sites if site['link'] not in existing_urls]
+    new_sites = [site for site in unique_discovered if site['link'] not in existing_urls]
     
     if new_sites:
-        print(f"\n🎉 DISCOVERED {len(new_sites)} NEW CREATIVE AI SITES!")
+        print(f"\n🎉 DISCOVERED {len(new_sites)} NEW CREATIVE AI SITES FROM THE WEB!")
         
-        # Show what was found
+        # Show breakdown by category
+        categories = {}
         for site in new_sites:
-            print(f"  {site['emoji']} {site['title']} - {site['category']}")
+            cat = site['category']
+            categories[cat] = categories.get(cat, 0) + 1
+        
+        print("📊 New sites by category:")
+        for cat, count in categories.items():
+            print(f"  {cat}: {count} sites")
         
         # Add to existing collection
         all_sites = existing_sites + new_sites
@@ -473,24 +472,29 @@ def main():
             file = repo.get_contents("creative_discoveries.json")
             repo.update_file(
                 path="creative_discoveries.json",
-                message=f"🚀 Multi-source discovery: {len(new_sites)} new creative AI sites - {datetime.now().strftime('%Y-%m-%d')}",
+                message=f"🌐 Pure web discovery: {len(new_sites)} fresh AI sites from the web - {datetime.now().strftime('%Y-%m-%d')}",
                 content=content,
                 sha=file.sha
             )
         except:
             repo.create_file(
                 path="creative_discoveries.json",
-                message=f"🚀 Create multi-source creative AI discoveries - {datetime.now().strftime('%Y-%m-%d')}",
+                message=f"🌐 Create web-discovered creative AI sites - {datetime.now().strftime('%Y-%m-%d')}",
                 content=content
             )
         
-        print(f"💾 Saved {len(new_sites)} new sites to GitHub!")
+        print(f"\n💾 Saved {len(new_sites)} new web-discovered sites to GitHub!")
         print(f"🎊 Total creative sites: {len(all_sites)}")
         
+        # Show examples
+        print(f"\n✨ Examples of web discoveries:")
+        for site in new_sites[:5]:
+            print(f"  {site['emoji']} {site['title']} - {site['category']}")
+        
     else:
-        print("🔍 No new creative AI sites found - all discovered sites already exist in collection!")
+        print("🔍 All discovered sites already exist in collection - web search found known sites")
     
-    print("\n✅ Supercharged multi-source discovery complete!")
+    print("\n✅ Pure web discovery complete!")
 
 if __name__ == "__main__":
     main()
