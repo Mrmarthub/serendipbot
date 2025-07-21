@@ -97,6 +97,7 @@ class WebDiscoveryAgent:
         """Extract key information from a website"""
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
+            response.encoding = 'utf-8'  # Force UTF-8 encoding
             soup = BeautifulSoup(response.content, 'html.parser')
             
             # Extract title
@@ -117,10 +118,14 @@ class WebDiscoveryAgent:
                 script.decompose()
             
             text_content = soup.get_text()
-            # Clean up text
+            # Clean up text and handle encoding issues
             lines = (line.strip() for line in text_content.splitlines())
             chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-            text_content = ' '.join(chunk for chunk in chunks if chunk)[:1500]
+            text_content = ' '.join(chunk for chunk in chunks if chunk)
+            
+            # Remove any problematic characters
+            text_content = text_content.encode('ascii', 'ignore').decode('ascii')
+            text_content = text_content[:1500]  # Limit length
             
             return {
                 'title': title_text,
