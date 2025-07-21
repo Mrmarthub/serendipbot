@@ -1,0 +1,76 @@
+{
+  "discoveries": [
+    {
+      "url": "https://beta.openai.com/playground",
+      "title": "No title",
+      "description": "No description",
+      "creativity_score": 8.0,
+      "quirkiness_score": 6.0,
+      "usefulness_score": 9.0,
+      "overall_score": 7.666666666666667,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T19:49:43.797822",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://huggingface.co/spaces",
+      "title": "Spaces - Hugging Face",
+      "description": "Discover amazing ML apps made by the community",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T19:49:46.371984",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://replicate.com",
+      "title": "Replicate - Run AI with an API",
+      "description": "Run open-source machine learning models with a cloud API",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T19:49:48.996221",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://runwayml.com",
+      "title": "Runway | Tools for human imagination.",
+      "description": "Runway is an applied research company shaping the next era of art, entertainment and human creativity.",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T19:49:51.097979",
+      "screenshot_url": null
+    },
+    {
+      "url": "https://midjourney.com",
+      "title": "Just a moment...",
+      "description": "No description",
+      "creativity_score": 6.0,
+      "quirkiness_score": 5.0,
+      "usefulness_score": 7.0,
+      "overall_score": 6.0,
+      "ai_features": [
+        "ai-tool"
+      ],
+      "discovered_date": "2025-07-21T19:49:53.173489",
+      "screenshot_url": null
+    }
+  ],
+  "last_updated": "2025-07-21T19:50:00.838706",
+  "total_discoveries": 5
+}
